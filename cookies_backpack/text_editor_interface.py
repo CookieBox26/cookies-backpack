@@ -4,17 +4,20 @@
 import subprocess
 import datetime
 import toml
+import os
 from typing import Callable, Optional
 
 
 class TextEditorInterface:
-    def __init__(self):
+    def __init__(self, log_file='~/log.txt'):
         self.text_editor = 'C:\\Program Files (x86)\\sakura\\sakura.exe'
-        self.log_file = 'log.txt'
+        self.log_file = os.path.expanduser(log_file)
 
     def get_query(self, mark_query, template=''):
         with open(self.log_file, mode='a', encoding='utf8', newline='\n') as ofile:
-            ofile.write(mark_query + '\n' + template)
+            ofile.write(f'{mark_query}\n')
+            if template != '':
+                ofile.write(f'{template}\n')
         subprocess.run([self.text_editor, self.log_file])
 
         user_input = input('Press Enter to continue or type `q` to quit: ')
@@ -33,7 +36,12 @@ class TextEditorInterface:
 
     def write_and_show_response(self, mark_resp, resp):
         with open(self.log_file, mode='a', encoding='utf8', newline='\n') as ofile:
-            ofile.write(f'{mark_resp}\n{resp}\n')
+            ofile.write(f'{mark_resp}\n')
+            if type(resp) is list:
+                for v in resp:
+                    ofile.write(f'{v}\n')
+            else:
+                ofile.write(f'{resp}\n')
         subprocess.Popen([self.text_editor, self.log_file])
 
     def run(
