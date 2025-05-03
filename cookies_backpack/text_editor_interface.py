@@ -9,8 +9,12 @@ from typing import Callable, Optional
 
 
 class TextEditorInterface:
-    def __init__(self, log_file='~/log.txt'):
-        self.text_editor = 'C:\\Program Files (x86)\\sakura\\sakura.exe'
+    def __init__(
+        self,
+        log_file='~/log.txt',
+        text_editor='C:\\Program Files (x86)\\sakura\\sakura.exe',
+    ):
+        self.text_editor = text_editor
         self.log_file = os.path.expanduser(log_file)
 
     def get_query(self, mark_query, template=''):
@@ -75,6 +79,9 @@ class TextEditorInterface:
 
     def run_with_args(self, func, args):
         self.run(func, template=toml.dumps(args), parser=toml.loads, kwargs=True)
+
+    def open(self, file_name):
+        subprocess.Popen([self.text_editor, file_name])
 
 
 if __name__ == '__main__':
