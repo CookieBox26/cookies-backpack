@@ -17,16 +17,17 @@ class TextEditorInterface:
         self.text_editor = text_editor
         self.log_file = os.path.expanduser(log_file)
 
-    def get_query(self, mark_query, template=''):
+    def get_query(self, mark_query, template='', confirm=True):
         with open(self.log_file, mode='a', encoding='utf8', newline='\n') as ofile:
             ofile.write(f'{mark_query}\n')
             if template != '':
                 ofile.write(f'{template}\n')
         subprocess.run([self.text_editor, self.log_file])
 
-        user_input = input('Press Enter to continue or type `q` to quit: ')
-        if user_input == 'q':
-            return ''
+        if confirm:
+            user_input = input('Press Enter to continue or type `q` to quit: ')
+            if user_input == 'q':
+                return ''
 
         flag = False
         query = ''
@@ -53,7 +54,9 @@ class TextEditorInterface:
         func: Callable,
         template: str = '',
         parser: Optional[Callable[[str], object]] = None,
-        kwargs: bool = False
+        kwargs: bool = False,
+        confirm: bool = True,
+        show: bool = True,
     ) -> None:
         """テキストエディタへの入力を促し、処理関数に渡した結果を表示します。
 
@@ -62,6 +65,8 @@ class TextEditorInterface:
             template: 入力テンプレート。
             parser: 入力をパースする関数。None の場合は入力文字列をそのまま処理関数に渡します。
             kwargs: True の場合、パース後の入力をキーワード引数として展開して処理関数に渡します。
+            confirm: True の場合、テキストエディタへの入力後に続行するか確認します。
+            show: True の場合、処理関数に渡した結果を表示します。
 
         Returns:
             None
@@ -69,19 +74,20 @@ class TextEditorInterface:
         dt_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         mark_query = f'# {dt_now} QUERY'
         mark_resp = f'# {dt_now} RESPONSE'
-        query = self.get_query(mark_query, template)
+        query = self.get_query(mark_query, template, confirm)
         if query == '':
             return
         if parser is not None:
             query = parser(query)
         resp = func(query) if not kwargs else func(**query)
-        self.write_and_show_response(mark_resp, resp)
+        if show:
+            self.write_and_show_response(mark_resp, resp)
 
-    def run_with_args(self, func, args):
-        self.run(func, template=toml.dumps(args), parser=toml.loads, kwargs=True)
-
-    def open(self, file_name):
-        subprocess.Popen([self.text_editor, file_name])
+    def run_with_args(self, func, args, confirm=True, show=True):
+        self.run(
+            func, template=toml.dumps(args), parser=toml.loads,
+            kwargs=True, confirm=confirm, show=show,
+        )
 
 
 if __name__ == '__main__':

@@ -4,19 +4,17 @@ from cookies_backpack.openai_wrapper import OpenAIWrapper
 import argparse
 
 
-def run_find_files():
-    tei = TextEditorInterface()
+def run_find_files(tei):
     args = {
         'target_dir': '~/space2/cookipedia/',
         'keyword': 'setButtonOpenClose',
         'extensions': ['.html', '.js'],
     }
-    tei.run_with_args(find_files, args)
+    tei.run_with_args(find_files, args, confirm=False)
 
 
-def run_openai():
+def run_openai(tei):
     ai = OpenAIWrapper()
-    tei = TextEditorInterface()
     tei.run(ai.request, template='鶏もも肉はどう料理するとよいですか。')
 
 
@@ -29,7 +27,9 @@ def main():
 
     if not any(vars(args).values()):
         parser.print_help()
+
+    tei = TextEditorInterface()
     if args.find_files:
-        run_find_files()
+        run_find_files(tei)
     if args.openai:
-        run_openai()
+        run_openai(tei)
