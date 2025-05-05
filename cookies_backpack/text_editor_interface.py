@@ -67,8 +67,8 @@ class TextEditorInterface:
             None
         """
         dt_now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        mark_query = f'# {dt_now} QUERY'
-        mark_resp = f'# {dt_now} RESPONSE'
+        mark_query = f'# {dt_now} {func.__name__} QUERY'
+        mark_resp = f'# {dt_now} {func.__name__} RESPONSE'
         query = self.get_query(mark_query, template, confirm)
         if query == '':
             return

@@ -20,6 +20,7 @@ dependencies = [
   "python-dotenv",
   "toml",
   "requests",
+  "pymupdf",
 ]
 
 [project.scripts]

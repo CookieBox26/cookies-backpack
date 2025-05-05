@@ -1,7 +1,7 @@
 from cookies_backpack.text_editor_interface import TextEditorInterface
 from cookies_backpack.find_files import find_files
+from cookies_backpack.download_pdf import download_pdf
 from cookies_backpack.openai_wrapper import OpenAIWrapper
-from cookies_backpack.utils import download_pdf
 import argparse
 import os
 
