@@ -5,6 +5,7 @@ import toml
 import fitz  # PyMuPDF
 # from . import _extra ImportError: DLL load failed while importing _extra -->
 # https://pymupdf.readthedocs.io/en/latest/installation.html#problems-after-installation
+from cookies_backpack.format_paper_text import format_paper_text
 
 
 def _get_filename(url, resp):
@@ -56,13 +57,17 @@ def _download_pdf_impl(url, out_dir):
         )
 
 
-def download_pdf(url, out_dir):
+def download_pdf(url, out_dir, title, paper=True):
     out_file = _download_pdf_impl(url, out_dir)
-    txt_file = out_file.replace('.pdf', '.txt')
-    text = ''
-    with fitz.open(out_file) as doc:
-        for page in doc:
-            text += page.get_text()
-    with open(txt_file, mode='w', encoding='utf8', newline='\n') as ofile:
-        ofile.write(text)
+    raw_txt_file = out_file.replace('.pdf', '.raw.txt')
+    formatted_txt_file = out_file.replace('.pdf', '.formatted.txt')
+    if not os.path.isfile(raw_txt_file):
+        text = ''
+        with fitz.open(out_file) as doc:
+            for page in doc:
+                text += page.get_text()
+        with open(raw_txt_file, mode='w', encoding='utf8', newline='\n') as ofile:
+            ofile.write(text)
+    if paper:
+        format_paper_text(raw_txt_file, formatted_txt_file, title)
     os.startfile(out_dir)
