@@ -4,18 +4,13 @@
 import subprocess
 import datetime
 import toml
-import os
 from typing import Callable, Optional
 
 
 class TextEditorInterface:
-    def __init__(
-        self,
-        log_file='~/log.txt',
-        text_editor='C:\\Program Files (x86)\\sakura\\sakura.exe',
-    ):
+    def __init__(self, log_file, text_editor):
         self.text_editor = text_editor
-        self.log_file = os.path.expanduser(log_file)
+        self.log_file = log_file
 
     def get_query(self, mark_query, template='', confirm=True):
         with open(self.log_file, mode='a', encoding='utf8', newline='\n') as ofile:
