@@ -1,7 +1,7 @@
 from cookies_backpack.text_editor_interface import TextEditorInterface
 from cookies_backpack.find_files import find_files
 from cookies_backpack.download_pdf import download_pdf
-from cookies_backpack.format_paper_text import format_sentences
+from cookies_backpack.yukkuri import Yukkuri
 from cookies_backpack.openai_wrapper import OpenAIWrapper
 import argparse
 import os
@@ -21,12 +21,17 @@ def run_download_pdf(tei):
         'url': 'https://arxiv.org/pdf/1704.04110',
         'out_dir': os.path.dirname(tei.log_file),
         'title': 'DeepAR: Probabilistic Forecasting with Autoregressive Recurrent Networks',
+        'downloaded': 'xxxxxx.pdf',
     }
-    tei.run_with_args(download_pdf, args)
+    tei.run_with_args(download_pdf, args, show=False)
 
 
-def run_format_sentences(tei):
-    tei.run(format_sentences, confirm=False)
+def run_yukkuri(aquestalkplayer, tei):
+    yukkuri = Yukkuri(aquestalkplayer, os.path.dirname(tei.log_file))
+    sublog = os.path.join(os.path.dirname(tei.log_file), 'yukkuri.txt')
+    tei.prepare_sublog(sublog)
+    args = {'identifier': '', 'in_file': sublog}
+    tei.run_with_args(yukkuri.synthesize, args, show=False)
 
 
 def run_openai(tei):
@@ -39,14 +44,14 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-f', '--find_files', action='store_true')
     group.add_argument('-d', '--download_pdf', action='store_true')
-    group.add_argument('-s', '--format_sentences', action='store_true')
+    group.add_argument('-y', '--yukkuri', action='store_true')
     group.add_argument('-a', '--openai', action='store_true')
     args = parser.parse_args()
 
     true_flags = sum([
         args.find_files,
         args.download_pdf,
-        args.format_sentences,
+        args.yukkuri,
         args.openai,
     ])
     if true_flags != 1:
@@ -63,7 +68,10 @@ def main():
         run_find_files(tei)
     if args.download_pdf:
         run_download_pdf(tei)
-    if args.format_sentences:
-        run_format_sentences(tei)
+    if args.yukkuri:
+        run_yukkuri(
+            os.path.expanduser('~/aquestalkplayer/AquesTalkPlayer.exe'),
+            tei,
+        )
     if args.openai:
         run_openai(tei)

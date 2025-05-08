@@ -5,6 +5,7 @@ import subprocess
 import datetime
 import toml
 from typing import Callable, Optional
+from pathlib import Path
 
 
 class TextEditorInterface:
@@ -34,7 +35,7 @@ class TextEditorInterface:
                     flag = True
         return query
 
-    def write_and_show_response(self, mark_resp, resp):
+    def write_and_show_response(self, mark_resp, resp, show):
         with open(self.log_file, mode='a', encoding='utf8', newline='\n') as ofile:
             ofile.write(f'{mark_resp}\n')
             if type(resp) is list:
@@ -42,7 +43,8 @@ class TextEditorInterface:
                     ofile.write(f'{v}\n')
             else:
                 ofile.write(f'{resp}\n')
-        subprocess.Popen([self.text_editor, self.log_file])
+        if show:
+            subprocess.Popen([self.text_editor, self.log_file])
 
     def run(
         self,
@@ -75,14 +77,19 @@ class TextEditorInterface:
         if parser is not None:
             query = parser(query)
         resp = func(query) if not kwargs else func(**query)
-        if show:
-            self.write_and_show_response(mark_resp, resp)
+        self.write_and_show_response(mark_resp, resp, show)
 
     def run_with_args(self, func, args, confirm=True, show=True):
         self.run(
             func, template=toml.dumps(args), parser=toml.loads,
             kwargs=True, confirm=confirm, show=show,
         )
+
+    def prepare_sublog(self, sublog):
+        p = Path(sublog)
+        if not p.exists():
+            p.touch()
+        subprocess.Popen([self.text_editor, sublog])
 
 
 if __name__ == '__main__':

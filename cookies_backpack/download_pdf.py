@@ -36,8 +36,9 @@ def _download_pdf_impl(url, out_dir):
     cache = _read_cache(cache_file)
 
     if url in cache:
-        print(f'Already Downloaded: {cache[url]}')
-        return cache[url]
+        if os.path.isfile(cache[url]):
+            print(f'Already Downloaded: {cache[url]}')
+            return cache[url]
 
     resp = requests.get(url)
     if resp.status_code == 200 and 'application/pdf' in resp.headers.get('Content-Type', ''):
@@ -57,8 +58,14 @@ def _download_pdf_impl(url, out_dir):
         )
 
 
-def download_pdf(url, out_dir, title, paper=True):
-    out_file = _download_pdf_impl(url, out_dir)
+def download_pdf(url, out_dir, title, downloaded='', paper=True):
+    out_file = ''
+    if downloaded != '':
+        downloaded_file = os.path.join(out_dir, downloaded)
+        if os.path.isfile(downloaded_file):
+            out_file = downloaded_file
+    if out_file == '':
+        out_file = _download_pdf_impl(url, out_dir)
     raw_txt_file = out_file.replace('.pdf', '.raw.txt')
     formatted_txt_file = out_file.replace('.pdf', '.formatted.txt')
     if not os.path.isfile(raw_txt_file):
