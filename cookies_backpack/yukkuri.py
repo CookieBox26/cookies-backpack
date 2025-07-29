@@ -28,7 +28,15 @@ class Yukkuri:
         audio = AudioSegment.silent(duration=1000)
         with open(out_text, mode='w', encoding='utf8', newline='\n') as ofile:
             for s in li:
-                subprocess.run([self.aquestalkplayer, '/P', 'まりさ', '/T', s, '/W', tmp_wav])
+                v = 'まりさ'
+                s_ = s
+                if s.startswith('れいむ：'):
+                    v = 'れいむ'
+                    s_ = s.replace('れいむ：', '')
+                if s.startswith('まりさ：'):
+                    v = 'まりさ'
+                    s_ = s.replace('まりさ：', '')
+                subprocess.run([self.aquestalkplayer, '/P', v, '/T', s_, '/W', tmp_wav])
                 audio_ = AudioSegment.from_wav(tmp_wav) + AudioSegment.silent(duration=600)
                 seconds = int(audio.duration_seconds)
                 seconds_formatted = f'{seconds // 60:02}:{seconds % 60:02}'

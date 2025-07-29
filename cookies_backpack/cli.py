@@ -3,11 +3,12 @@ from cookies_backpack.find_files import find_files
 from cookies_backpack.download_pdf import download_pdf
 from cookies_backpack.yukkuri import Yukkuri
 from cookies_backpack.openai_wrapper import OpenAIWrapper
+import toml
 import argparse
 import os
 
 
-def run_find_files(tei):
+def run_find(tei):
     args = {
         'target_dir': '~/workspace/cookipedia/',
         'keyword': 'setButtonOpenClose',
@@ -16,7 +17,7 @@ def run_find_files(tei):
     tei.run_with_args(find_files, args, confirm=False)
 
 
-def run_download_pdf(tei):
+def run_pdf(tei):
     args = {
         'url': 'https://arxiv.org/pdf/1704.04110',
         'out_dir': os.path.dirname(tei.log_file),
@@ -42,15 +43,15 @@ def run_openai(tei):
 def main():
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-f', '--find_files', action='store_true')
-    group.add_argument('-d', '--download_pdf', action='store_true')
-    group.add_argument('-y', '--yukkuri', action='store_true')
-    group.add_argument('-a', '--openai', action='store_true')
+    group.add_argument('--find', action='store_true')
+    group.add_argument('--pdf', action='store_true')
+    group.add_argument('--yukkuri', action='store_true')
+    group.add_argument('--openai', action='store_true')
     args = parser.parse_args()
 
     true_flags = sum([
-        args.find_files,
-        args.download_pdf,
+        args.find,
+        args.pdf,
         args.yukkuri,
         args.openai,
     ])
@@ -58,16 +59,27 @@ def main():
         parser.print_help()
         return
 
-    work_dir = os.path.expanduser('~/.cb/')
+    work_dir = os.environ.get('COOKIES_BACKPACK_WORK_DIR')
+    if work_dir is None:
+        work_dir = '~/.cb/'
+    work_dir = os.path.expanduser(work_dir)
     os.makedirs(work_dir, exist_ok=True)
+
+    text_editor = 'C:\\Windows\\System32\\notepad.exe'
+    conf_toml = os.path.join(work_dir, 'config.toml')
+    if os.path.isfile(conf_toml):
+        conf = toml.load(conf_toml)
+        if 'text_editor' in conf:
+            text_editor = conf['text_editor']
+
     tei = TextEditorInterface(
         log_file=os.path.join(work_dir, 'log.txt'),
-        text_editor='C:\\Program Files (x86)\\sakura\\sakura.exe',
+        text_editor=text_editor,
     )
-    if args.find_files:
-        run_find_files(tei)
-    if args.download_pdf:
-        run_download_pdf(tei)
+    if args.find:
+        run_find(tei)
+    if args.pdf:
+        run_pdf(tei)
     if args.yukkuri:
         run_yukkuri(
             os.path.expanduser('~/aquestalkplayer/AquesTalkPlayer.exe'),
